@@ -12,7 +12,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -25,18 +24,18 @@ public class ConvertParser {
 		File file = new File( filename );
 
 		IDataParser[] cellparsers = new IDataParser[] {
-				ParseInteger.getParser( 1 ),
-				ParseInteger.getParser( 2 ),
-				ParseString.getParser( 3 ),
-				ParseString.getParser( 4 ),
-				ParseString.getParser( 5 ),
-				ParseInteger.getParser( 6 ),
-				ParseString.getParser( 7 ),
-				ParseDatetime.getParser( 8 ),
-				ParseString.getParser( 9 )
+				ParseInteger.getParser(),
+				ParseInteger.getParser(),
+				ParseString.getParser(),
+				ParseString.getParser(),
+				ParseString.getParser(),
+				ParseInteger.getParser(),
+				ParseString.getParser(),
+				ParseTimestamp.getParser( "yyyy-MM-dd hh:mm:ss" ),
+				ParseString.getParser()
 		};
 
-		CSVParser cvsparser = CSVParser.load( file );
+		CSVParser cvsparser = CSVParser.load( file, ',' );
 
 		try {
 			Class.forName("net.sourceforge.jtds.jdbc.Driver").newInstance();
@@ -109,7 +108,7 @@ public class ConvertParser {
 						tmpStr = (String)array.get( i );
 						cd = cellparsers[ i ].parseData( tmpStr );
 						try {
-							cd.insert( insertStm );
+							cd.insert( insertStm, i + 1 );
 						}
 						catch (SQLException e) {
 							e.printStackTrace();
@@ -130,9 +129,11 @@ public class ConvertParser {
 				}
 			}
 		}
-		catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		catch (CSVParserException e) {
+			e.printStackTrace();
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
 		}
 
 		try {

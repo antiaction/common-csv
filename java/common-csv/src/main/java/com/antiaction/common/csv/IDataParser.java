@@ -8,6 +8,6 @@ package com.antiaction.common.csv;
 
 public interface IDataParser {
 
-	public IConvertedData parseData(String data);
+	public IConvertedData parseData(String data) throws CSVParserException;
 
 }

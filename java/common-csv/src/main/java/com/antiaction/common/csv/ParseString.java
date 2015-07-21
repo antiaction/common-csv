@@ -11,29 +11,30 @@ import java.sql.SQLException;
 
 public class ParseString implements IDataParser {
 
-	private int idx;
-
-	private ParseString(int idx) {
-		this.idx = idx;
+	private ParseString() {
 	}
 
-	public static IDataParser getParser(int idx) {
-		return new ParseString( idx );
+	public static IDataParser getParser() {
+		return new ParseString();
 	}
 
 	public IConvertedData parseData(String data) {
 		return new StringData( data );
 	}
 
-	public class StringData implements IConvertedData {
+	public static class StringData implements IConvertedData {
 
-		private String str;
+		protected String str;
 
 		public StringData(String str) {
 			this.str = str;
 		}
 
-		public void insert(PreparedStatement stm) throws SQLException {
+		public String getData() {
+			return str;
+		}
+
+		public void insert(PreparedStatement stm, int idx) throws SQLException {
 			stm.setString( idx, str );
 		}
 

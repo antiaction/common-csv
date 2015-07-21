@@ -11,6 +11,8 @@ import java.sql.SQLException;
 
 public interface IConvertedData {
 
-	public void insert(PreparedStatement stm) throws SQLException;
+	public Object getData();
+
+	public void insert(PreparedStatement stm, int idx) throws SQLException;
 
 }

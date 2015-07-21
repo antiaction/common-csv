@@ -12,17 +12,14 @@ import java.sql.SQLException;
 
 public class ParseHexString implements IDataParser {
 
-	private int idx;
-
-	private ParseHexString(int idx) {
-		this.idx = idx;
+	protected ParseHexString() {
 	}
 
-	public static IDataParser getParser(int idx) {
-		return new ParseHexString( idx );
+	public static IDataParser getParser() {
+		return new ParseHexString();
 	}
 
-	public IConvertedData parseData(String data) {
+	public IConvertedData parseData(String data) throws CSVParserException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		int i = 0;
 		if ( data.startsWith( "0x" ) ) {
@@ -41,7 +38,7 @@ public class ParseHexString implements IDataParser {
 					b = (byte)((c - 'a' + 10) << 4);
 				}
 				else {
-					throw new IllegalArgumentException();
+					throw new CSVParserException( "Not a valid hexadecial string!" );
 				}
 			}
 			++i;
@@ -55,27 +52,31 @@ public class ParseHexString implements IDataParser {
 					b |= (byte)(c - 'a' + 10);
 				}
 				else {
-					throw new IllegalArgumentException();
+					throw new CSVParserException( "Not a valid hexadecial string!" );
 				}
 			}
 			++i;
 			out.write( b );
 		}
 		if ( i < data.length() ) {
-			throw new IllegalArgumentException();
+			throw new CSVParserException( "Not a valid hexadecial string!" );
 		}
 		return new BytesData( out.toByteArray() );
 	}
 
-	public class BytesData implements IConvertedData {
+	public static class BytesData implements IConvertedData {
 
-		private byte[] bytes;
+		protected byte[] bytes;
 
 		public BytesData(byte[] bytes) {
 			this.bytes = bytes;
 		}
 
-		public void insert(PreparedStatement stm) throws SQLException {
+		public byte[] getData() {
+			return bytes;
+		}
+
+		public void insert(PreparedStatement stm, int idx) throws SQLException {
 			stm.setBytes( idx, bytes );
 		}
 

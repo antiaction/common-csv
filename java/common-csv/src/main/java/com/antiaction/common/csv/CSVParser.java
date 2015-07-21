@@ -18,14 +18,15 @@ public class CSVParser {
 
 	private File csvfile = null;
 
-	public static CSVParser load(File csvfile) {
+	private char delimiter;
+
+	public static CSVParser load(File csvfile, char delimiter) {
 		if ( !csvfile.exists() ) {
 			return null;
 		}
-
 		CSVParser parser = new CSVParser();
 		parser.csvfile = csvfile;
-
+		parser.delimiter = delimiter;
 		return parser;
 	}
 
@@ -44,7 +45,7 @@ public class CSVParser {
 
 		final static int S_START = 0;
 		final static int S_QUOTE = 1;
-		final static int S_COMMA = 2;
+		final static int S_DELIMITER = 2;
 		final static int S_STRING = 3;
 
 		RandomAccessFile ram;
@@ -130,11 +131,11 @@ public class CSVParser {
 							else {
 								array.add( currStr.substring( sidx, idx ).trim() );
 								sidx = ++idx;
-								state = S_COMMA;
+								state = S_DELIMITER;
 							}
 							break;
-						case S_COMMA:
-							if ( c != ',' ) {
+						case S_DELIMITER:
+							if ( c != delimiter ) {
 								sidx = ++idx;
 							}
 							else {
@@ -143,7 +144,7 @@ public class CSVParser {
 							}
 							break;
 						case S_STRING:
-							if ( c != ',' ) {
+							if ( c != delimiter ) {
 								++idx;
 							}
 							else {
@@ -181,7 +182,7 @@ public class CSVParser {
 
 		File file = new File( filename );
 
-		CSVParser cvsparser = CSVParser.load( file );
+		CSVParser cvsparser = CSVParser.load( file, ',' );
 
 		Iterator iter = cvsparser.iterator();
 		if ( iter != null ) {
