@@ -12,56 +12,66 @@ import java.sql.SQLException;
 
 public class ParseHexString implements IDataParser {
 
-	protected ParseHexString() {
+	protected boolean bAllowEmpty;
+
+	protected ParseHexString(boolean bAllowEmpty) {
+		this.bAllowEmpty = bAllowEmpty;
 	}
 
-	public static IDataParser getParser() {
-		return new ParseHexString();
+	public static ParseHexString getParser(boolean bAllowEmpty) {
+		return new ParseHexString( bAllowEmpty );
 	}
 
 	public IConvertedData parseData(String data) throws CSVParserException {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		int i = 0;
-		if ( data.startsWith( "0x" ) ) {
-			i += 2;
-		}
-		byte b;
-		char c;
-		while ( i < (data.length() - 1) ) {
-			c = data.charAt( i );
-			if ( c >= '0' && c <= '9' ) {
-				b = (byte)((c - '0') << 4);
+		byte[] bytes = null;
+		if ( data.length() > 0 ) {
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			int i = 0;
+			if ( data.startsWith( "0x" ) ) {
+				i += 2;
 			}
-			else {
-				Character.toLowerCase( c );
-				if ( c >= 'a' && c <= 'f' ) {
-					b = (byte)((c - 'a' + 10) << 4);
+			byte b;
+			char c;
+			while ( i < (data.length() - 1) ) {
+				c = data.charAt( i );
+				if ( c >= '0' && c <= '9' ) {
+					b = (byte)((c - '0') << 4);
 				}
 				else {
-					throw new CSVParserException( "Not a valid hexadecial string!" );
+					Character.toLowerCase( c );
+					if ( c >= 'a' && c <= 'f' ) {
+						b = (byte)((c - 'a' + 10) << 4);
+					}
+					else {
+						throw new CSVParserException( "Not a valid hexadecial string!" );
+					}
 				}
-			}
-			++i;
-			c = data.charAt( i );
-			if ( c >= '0' && c <= '9' ) {
-				b |= (byte)(c - '0');
-			}
-			else {
-				Character.toLowerCase( c );
-				if ( c >= 'a' && c <= 'f' ) {
-					b |= (byte)(c - 'a' + 10);
+				++i;
+				c = data.charAt( i );
+				if ( c >= '0' && c <= '9' ) {
+					b |= (byte)(c - '0');
 				}
 				else {
-					throw new CSVParserException( "Not a valid hexadecial string!" );
+					Character.toLowerCase( c );
+					if ( c >= 'a' && c <= 'f' ) {
+						b |= (byte)(c - 'a' + 10);
+					}
+					else {
+						throw new CSVParserException( "Not a valid hexadecial string!" );
+					}
 				}
+				++i;
+				out.write( b );
 			}
-			++i;
-			out.write( b );
+			if ( i < data.length() ) {
+				throw new CSVParserException( "Not a valid hexadecial string!" );
+			}
+			bytes = out.toByteArray();
 		}
-		if ( i < data.length() ) {
-			throw new CSVParserException( "Not a valid hexadecial string!" );
+		else if ( !bAllowEmpty ) {
+			throw new CSVParserException( "Empty hexadecimal string not allowed!" );
 		}
-		return new BytesData( out.toByteArray() );
+		return new BytesData( bytes );
 	}
 
 	public static class BytesData implements IConvertedData {

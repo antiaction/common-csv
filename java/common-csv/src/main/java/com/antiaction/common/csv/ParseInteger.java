@@ -11,29 +11,37 @@ import java.sql.SQLException;
 
 public class ParseInteger implements IDataParser {
 
-	private ParseInteger() {
+	protected boolean bAllowEmpty;
+
+	protected ParseInteger(boolean bAllowEmpty) {
+		this.bAllowEmpty = bAllowEmpty;
 	}
 
-	public static IDataParser getParser() {
-		return new ParseInteger();
+	public static ParseInteger getParser(boolean bAllowEmpty) {
+		return new ParseInteger( bAllowEmpty );
 	}
 
 	public IConvertedData parseData(String data) throws CSVParserException {
-		int i;
-		try {
-			i = Integer.parseInt( data );
+		Integer i = null;
+		if ( data.length() > 0 ) {
+			try {
+				i = Integer.parseInt( data );
+			}
+			catch (NumberFormatException e) {
+				throw new CSVParserException( "Not a valid integer!", e );
+			}
 		}
-		catch (NumberFormatException e) {
-			throw new CSVParserException( "Not a valid integer!", e );
+		else if ( !bAllowEmpty ) {
+			throw new CSVParserException( "Empty integer string not allowed!" );
 		}
 		return new IntegerData( i );
 	}
 
 	public static class IntegerData implements IConvertedData {
 
-		protected int i;
+		protected Integer i;
 
-		public IntegerData(int i) {
+		public IntegerData(Integer i) {
 			this.i = i;
 		}
 

@@ -24,15 +24,15 @@ public class ConvertParser {
 		File file = new File( filename );
 
 		IDataParser[] cellparsers = new IDataParser[] {
-				ParseInteger.getParser(),
-				ParseInteger.getParser(),
-				ParseString.getParser(),
-				ParseString.getParser(),
-				ParseString.getParser(),
-				ParseInteger.getParser(),
-				ParseString.getParser(),
-				ParseTimestamp.getParser( "yyyy-MM-dd hh:mm:ss" ),
-				ParseString.getParser()
+				ParseInteger.getParser( false ),
+				ParseInteger.getParser( false ),
+				ParseString.getParser( false ),
+				ParseString.getParser( false ),
+				ParseString.getParser( false ),
+				ParseInteger.getParser( false ),
+				ParseString.getParser( false ),
+				ParseTimestampFormat.getParser( "yyyy-MM-dd hh:mm:ss", false ),
+				ParseString.getParser( false )
 		};
 
 		CSVParser cvsparser = CSVParser.load( file, ',' );

@@ -11,14 +11,22 @@ import java.sql.SQLException;
 
 public class ParseString implements IDataParser {
 
-	private ParseString() {
+	protected boolean bAllowEmpty;
+
+	protected ParseString(boolean bAllowEmpty) {
+		this.bAllowEmpty = bAllowEmpty;
 	}
 
-	public static IDataParser getParser() {
-		return new ParseString();
+	public static ParseString getParser(boolean bAllowEmpty) {
+		return new ParseString( bAllowEmpty );
 	}
 
-	public IConvertedData parseData(String data) {
+	public IConvertedData parseData(String data) throws CSVParserException {
+		if ( data.length() > 0 ) {
+		}
+		else if ( !bAllowEmpty ) {
+			throw new CSVParserException( "Empty string not allowed!" );
+		}
 		return new StringData( data );
 	}
 

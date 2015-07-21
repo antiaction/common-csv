@@ -5,29 +5,37 @@ import java.sql.SQLException;
 
 public class ParseLong implements IDataParser {
 
-	private ParseLong() {
+	protected boolean bAllowEmpty;
+
+	protected ParseLong(boolean bAllowEmpty) {
+		this.bAllowEmpty = bAllowEmpty;
 	}
 
-	public static IDataParser getParser() {
-		return new ParseLong();
+	public static ParseLong getParser(boolean bAllowEmpty) {
+		return new ParseLong( bAllowEmpty );
 	}
 
 	public IConvertedData parseData(String data) throws CSVParserException {
-		long l;
-		try {
-			l = Long.parseLong( data );
+		Long l = null;
+		if ( data.length() > 0 ) {
+			try {
+				l = Long.parseLong( data );
+			}
+			catch (NumberFormatException e) {
+				throw new CSVParserException( "Not a valid integer!", e );
+			}
 		}
-		catch (NumberFormatException e) {
-			throw new CSVParserException( "Not a valid integer!", e );
+		else if ( !bAllowEmpty ) {
+			throw new CSVParserException( "Empty long string not allowed!" );
 		}
 		return new LongData( l );
 	}
 
 	public static class LongData implements IConvertedData {
 
-		protected long l;
+		protected Long l;
 
-		public LongData(long i) {
+		public LongData(Long i) {
 			this.l = i;
 		}
 

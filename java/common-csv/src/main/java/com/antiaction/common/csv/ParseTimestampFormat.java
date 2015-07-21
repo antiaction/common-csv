@@ -15,27 +15,37 @@ import java.util.Date;
 
 // "EEE MMM d hh:mm:ss yyyy"
 // "yyyy-MM-dd hh:mm:ss"
-public class ParseTimestamp implements IDataParser {
+public class ParseTimestampFormat implements IDataParser {
 
 	protected SimpleDateFormat dateFormat;
 
-	private ParseTimestamp(String dateFormatStr) {
-		dateFormat = new SimpleDateFormat( dateFormatStr );
+	protected boolean bAllowEmpty;
+
+	protected ParseTimestampFormat(String dateFormatStr, boolean bAllowEmpty) {
+		this.dateFormat = new SimpleDateFormat( dateFormatStr );
+		this.bAllowEmpty = bAllowEmpty;
 	}
 
-	public static IDataParser getParser(String dateFormatStr) {
-		return new ParseTimestamp( dateFormatStr );
+	public static ParseTimestampFormat getParser(String dateFormatStr, boolean bAllowEmpty) {
+		return new ParseTimestampFormat( dateFormatStr, bAllowEmpty );
 	}
 
 	public IConvertedData parseData(String data) throws CSVParserException {
 		Date date;
-		try {
-			date = dateFormat.parse( data );
+		Timestamp ts = null;
+		if ( data.length() > 0 ) {
+			try {
+				date = dateFormat.parse( data );
+				ts = new Timestamp( date.getTime() );
+			}
+			catch (ParseException e) {
+				throw new CSVParserException( "Not a valid date format!", e );
+			}
 		}
-		catch (ParseException e) {
-			throw new CSVParserException( "Not a valid date format!", e );
+		else if ( !bAllowEmpty ) {
+			throw new CSVParserException( "Empty timestamp string not allowed!" );
 		}
-		return new DateTimeData( new Timestamp( date.getTime() ) );
+		return new DateTimeData( ts );
 	}
 
 	public static class DateTimeData implements IConvertedData {
@@ -46,7 +56,7 @@ public class ParseTimestamp implements IDataParser {
 			this.ts = ts;
 		}
 
-		public Object getData() {
+		public Timestamp getData() {
 			return ts;
 		}
 
