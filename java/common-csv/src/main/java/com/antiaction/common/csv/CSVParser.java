@@ -159,7 +159,7 @@ public class CSVParser {
 						if ( sidx < idx ) {
 							array.add( currStr.substring( sidx, idx ).trim() );
 						}
-						else {
+						else if ( state == S_DELIMITER ) {
 							array.add( "" );
 						}
 						b = false;
